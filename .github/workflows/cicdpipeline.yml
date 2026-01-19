@@ -19,16 +19,18 @@ jobs:
       run: mvn -B package --file pom.xml
 
   Security-Checks:
+    needs: Compile
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Trivy Installation
       run: |
-       TRIVY_VERSION=$(curl -s "https://api.github.io/repos/aquasecurity/trivy/releases/latest" | grep -Po '"tag_name": "v\K[0-9.] +')
-       wget -qO trivy.tar.gz https://github.com/aquasecurity/trivy/releases/latest/download/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
-       sudo tar xf trivy.tar.gz -C /usr/local/bin trivy
-       rm trivy.tar.gz # Clean up
+       TRIVY_VERSION=$(curl -s https://api.github.io/repos/aquasecurity/trivy/releases/latest \
+       | grep -Po '"tag_name":\s*"v\K[0-9.]+' )
+       wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
+       sudo tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin trivy
+       rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz  
 
     - name: Trivy fs Scan
       run: trivy fs --format table -o fs-report.json .
