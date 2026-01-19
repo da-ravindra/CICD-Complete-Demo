@@ -26,11 +26,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Trivy Installation
       run: |
-       TRIVY_VERSION=$(curl -s https://api.github.io/repos/aquasecurity/trivy/releases/latest \
-       | grep -Po '"tag_name":\s*"v\K[0-9.]+' )
-       wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
-       sudo tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin trivy
-       rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz  
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update -y
+        sudo apt-get install -y trivy 
 
     - name: Trivy fs Scan
       run: trivy fs --format table -o fs-report.json .
